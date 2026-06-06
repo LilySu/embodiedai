@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from embodied_agents.agents.triage import triage
 from embodied_agents.api.auth import AuthContext, require_auth
 from embodied_agents.guardrails.input import GuardrailError
-from embodied_agents.observability.privacy_redactor import redact_event
+from embodied_agents.observability.weave_setup import publish_redacted_event
 from embodied_agents.schemas.agent import AgentInvokeRequest, AgentInvokeResponse
 
 router = APIRouter()
@@ -24,5 +24,5 @@ async def invoke_agent(
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    redact_event({"request": request.model_dump(), "response": response.model_dump()})
+    publish_redacted_event("agent_invoke", {"request": request.model_dump(), "response": response.model_dump()})
     return response

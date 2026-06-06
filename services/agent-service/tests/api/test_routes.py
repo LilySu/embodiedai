@@ -1,5 +1,3 @@
-import os
-
 from fastapi.testclient import TestClient
 
 from embodied_agents.api.main import app
@@ -15,6 +13,7 @@ def test_invoke_message_relay_route(monkeypatch) -> None:
             "request_type": "message_relay",
             "viewer_pseudo_id": "sender_123",
             "payload": {
+                "match_id": "match_123",
                 "sender_pseudo_id": "sender_123",
                 "recipient_pseudo_id": "recipient_123",
                 "raw_text": "My email is mary@example.com",

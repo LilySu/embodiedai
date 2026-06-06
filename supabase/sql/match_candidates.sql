@@ -1,4 +1,5 @@
-create or replace view public.match_candidates as
+create or replace view public.match_candidates
+with (security_invoker = true) as
 select
   viewer.pseudo_id as viewer_pseudo_id,
   candidate.pseudo_id as candidate_pseudo_id,

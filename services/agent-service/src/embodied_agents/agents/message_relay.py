@@ -1,3 +1,4 @@
+from embodied_agents.agents.runner import message_relay_agent, run_agent, should_use_openai_agents
 from embodied_agents.guardrails.input import GuardrailError, reject_known_injection
 from embodied_agents.guardrails.output import validate_message_output
 from embodied_agents.schemas.message import MessageInput, MessageOutput, RemovedItem
@@ -11,6 +12,10 @@ async def run_message_relay(payload: MessageInput) -> MessageOutput:
         return MessageOutput(blocked=True, reason=exc.reason)
 
     pre_match = payload.match_status == "pre"
+    if should_use_openai_agents():
+        output = await run_agent(message_relay_agent, payload, MessageOutput)
+        return validate_message_output(output, pre_match=pre_match)
+
     scrubbed_text, findings = scrub_text(payload.raw_text, pre_match=pre_match)
 
     if payload.match_status == "post" and payload.post_match_contact_consent:

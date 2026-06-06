@@ -1,10 +1,6 @@
-import re
-
 from embodied_agents.schemas.match import MatchPresentationOutput
 from embodied_agents.schemas.message import MessageOutput
 from embodied_agents.tools.pii_regex import FIRST_NAME_PATTERN, pii_regex_scan
-
-MATCH_CARD_DIGIT_PATTERN = re.compile(r"\b\d+(?::\d+)?\b")
 
 
 def validate_message_output(output: MessageOutput, *, pre_match: bool) -> MessageOutput:
@@ -25,6 +21,4 @@ def validate_match_card_output(output: MatchPresentationOutput) -> MatchPresenta
     text = " ".join([output.card_text, output.excerpt, " ".join(output.displayed_features)])
     if pii_regex_scan(text, include_names=False, include_time=True):
         raise ValueError("match_card_pii_detected")
-    if MATCH_CARD_DIGIT_PATTERN.search(text):
-        raise ValueError("match_card_specific_digit_detected")
     return output

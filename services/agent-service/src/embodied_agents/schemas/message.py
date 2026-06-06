@@ -9,6 +9,7 @@ class RemovedItem(BaseModel):
 
 
 class MessageInput(BaseModel):
+    match_id: str = Field(min_length=8, max_length=128)
     sender_pseudo_id: str = Field(min_length=8, max_length=128)
     recipient_pseudo_id: str = Field(min_length=8, max_length=128)
     raw_text: str = Field(min_length=1, max_length=2000)

@@ -23,13 +23,29 @@ PROMPT_INJECTION_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
-FIRST_NAME_PATTERN = re.compile(
-    r"\b(?:Alice|Barbara|Betty|Carol|Deborah|Diane|Donna|Elizabeth|Jane|Janet|Joan|Judith|Linda|Mary|Nancy|Patricia|Susan)\b"
-)
+COMMON_US_FIRST_NAMES = {
+    "alice", "amanda", "amy", "andrea", "angela", "ann", "anna", "anne", "annie", "ashley",
+    "barbara", "betty", "beverly", "bonnie", "brenda", "carl", "carol", "carole", "carolyn",
+    "catherine", "charles", "cheryl", "christine", "cynthia", "daniel", "david", "deborah",
+    "debra", "denise", "diane", "diana", "donna", "dorothy", "edward", "elizabeth", "emily",
+    "frances", "frank", "george", "gloria", "helen", "janet", "janice", "jane", "jean",
+    "jeffrey", "jennifer", "jessica", "joan", "joyce", "judith", "judy", "julia", "julie",
+    "karen", "kathleen", "katherine", "kathy", "kenneth", "kimberly", "laura", "linda",
+    "lisa", "margaret", "maria", "marie", "marilyn", "mark", "martha", "mary", "melissa",
+    "michael", "michelle", "nancy", "nicole", "pamela", "patricia", "paula", "rebecca",
+    "richard", "robert", "sandra", "sara", "sarah", "sharon", "shirley", "stephanie",
+    "steven", "susan", "tammy", "teresa", "theresa", "thomas", "victoria", "william",
+}
 
-FULL_NAME_PATTERN = re.compile(r"\b[A-Z][a-z]{2,}\s+[A-Z][a-z]{2,}\b")
+FIRST_NAME_PATTERN = re.compile(r"\b(?:" + "|".join(sorted(COMMON_US_FIRST_NAMES)) + r")\b", re.IGNORECASE)
 
-TIME_SPECIFIC_PATTERN = re.compile(r"\b(?:[01]?\d|2[0-3])(?::[0-5]\d)?\s*(?:am|pm|AM|PM)?\b")
+FULL_NAME_CANDIDATE_PATTERN = re.compile(r"\b([A-Z][a-z]{2,})\s+([A-Z][a-z]{2,})\b")
+
+TIME_SPECIFIC_PATTERN = re.compile(r"\b(?:[01]?\d|2[0-3]):[0-5]\d\s*(?:am|pm|AM|PM)?\b|\b(?:[1-9]|1[0-2])\s*(?:am|pm|AM|PM)\b")
+NON_NAME_SECOND_WORDS = {
+    "Avenue", "Boulevard", "Cafe", "Coffee", "Court", "Drive", "Lane", "Market", "Morning",
+    "Park", "Place", "Road", "Shop", "Square", "Street", "Trail", "Way",
+}
 
 
 def pii_regex_scan(text: str, *, include_names: bool = False, include_time: bool = False) -> list[PiiFinding]:
@@ -37,7 +53,10 @@ def pii_regex_scan(text: str, *, include_names: bool = False, include_time: bool
     for kind, pattern in PII_PATTERNS:
         findings.extend(PiiFinding(kind=kind, value=match.group(0)) for match in pattern.finditer(text))
 
-    findings.extend(PiiFinding(kind="full_name", value=match.group(0)) for match in FULL_NAME_PATTERN.finditer(text))
+    for match in FULL_NAME_CANDIDATE_PATTERN.finditer(text):
+        first, second = match.group(1), match.group(2)
+        if first.lower() in COMMON_US_FIRST_NAMES and second not in NON_NAME_SECOND_WORDS:
+            findings.append(PiiFinding(kind="full_name", value=match.group(0)))
 
     if include_names:
         findings.extend(PiiFinding(kind="first_name", value=match.group(0)) for match in FIRST_NAME_PATTERN.finditer(text))

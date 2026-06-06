@@ -3,9 +3,11 @@ from fastapi import FastAPI
 
 from embodied_agents.api.routes import router
 from embodied_agents.observability.otel_setup import setup_otel
+from embodied_agents.observability.weave_setup import setup_weave
 
 app = FastAPI(title="Embodied Coffee Agent Service", version="0.1.0")
 app.include_router(router)
+setup_weave()
 setup_otel(app)
 
 

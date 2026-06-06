@@ -1,0 +1,15 @@
+{
+  "name": "embodied-coffee",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "typecheck": "pnpm -r typecheck",
+    "test:agent": "uv run pytest",
+    "dev:app": "pnpm --filter @embodied/app start",
+    "dev:admin": "pnpm --filter @embodied/admin dev"
+  },
+  "devDependencies": {
+    "supabase": "^2.105.0",
+    "typescript": "^5.7.0"
+  }
+}
